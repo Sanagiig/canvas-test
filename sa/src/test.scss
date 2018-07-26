@@ -1,0 +1,7 @@
+$c1:black;
+$c2:white;
+
+test{
+  color:mix($c1,$c2,10%)
+}
+

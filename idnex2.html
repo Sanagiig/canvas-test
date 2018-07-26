@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./require.js" data-main="main"></script>
+
+    <script>
+        var Base = function () {
+            this.a = 2
+        }
+        Base.prototype.a = 3;
+        var o1 = new Base();
+        var o2 = Object.create(Base.prototype);
+        console.log(o1);
+        console.log(o2.a);
+    </script>
+</head>
+<body>
+body
+<div id="test" > this is test</div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+// Gradients
+
+@mixin gradient-bg($color) {
+  @if $enable-gradients {
+    background: $color linear-gradient(135deg, mix($body-bg, $color, 35%), $color) repeat-x;
+  } @else {
+    background-color: $color;
+  }
+}
+
+@mixin gradient-striped($color: rgba($white, .15), $angle: 45deg) {
+  background-image: linear-gradient($angle, $color 25%, transparent 25%, transparent 50%, $color 50%, $color 75%, transparent 75%, transparent);
+}
+

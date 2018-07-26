@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: black;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    function rand(min, max) {
+        return min + (Math.random() * max + min);
+    }
+
+    function randInt(min, max) {
+        return Math.floor(min + Math.random() * (max - min + 1));
+    }
+
+    function onresize() {
+        reset();
+    }
+
+    function reset() {
+        canvas.width = width = window.innerWidth;
+        canvas.height = height = window.innerHeight;
+        lines.length = 0;
+        tick = 0;
+    }
+
+    function loop() {
+        requestAnimationFrame(loop);
+        create();
+        step();
+        clear();
+        draw();
+        tick++;
+    }
+
+    function create() {
+        if (tick % 10 == 0) {
+            lines.push(new line());
+        }
+    }
+
+    function step() {
+        lines.forEach(function (line, index) {
+            line.step(index);
+        })
+    }
+
+    function draw() {
+        var scale = 1 + Math.sin(tick * 0.01) * 0.4;
+
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+        // ctx.rotate(tick * 0.001);
+        // ctx.scale(scale,scale);
+        ctx.translate(-width / 2, -height / 2);
+        lines.forEach(function (line, index) {
+            line.draw();
+        })
+        ctx.restore();
+    }
+
+    function clear() {
+        ctx.globalCompositeOperation = "destination-out"
+        ctx.fillStyle = 'hsla(0,0%,0%,0.1';
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalCompositeOperation = 'lighter';
+
+    }
+
+
+    function line() {
+        this.x = width / 2;
+        this.y = height / 2;
+        this.hue = tick % 70;
+        this.life = 2000;
+        this.allLife = this.life;
+        this.angle = 0;
+        this.dist = 0;
+        this.targetX = width / 2;
+        this.targetY = height / 2;
+        this.vdist = rand(1, 5);
+        this.pointCount = randInt(10, 50);
+        this.path = [];
+    }
+
+    line.prototype.updateDist = function () {
+        var dx = this.targetX - this.x,
+          dy = this.targetY - this.y;
+
+        this.dist = Math.sqrt(dx * dx + dy * dy);
+    }
+
+    line.prototype.updateAngle = function () {
+        var dx = this.targetX - this.x,
+          dy = this.targetY - this.y;
+
+        this.angle = Math.atan2(dy, dx);
+    }
+
+    line.prototype.changeTarget = function () {
+        var direct = randInt(0, 3);
+
+        switch (direct) {
+            case 0:
+                this.targetY = this.y - size;
+                break;
+            case 1: // right
+                this.targetX = this.x + size;
+                break;
+            case 2: // down
+                this.targetY = this.y + size;
+                break;
+            case 3: // left
+                this.targetX = this.x - size;
+        }
+
+        this.updateAngle();
+    }
+
+    line.prototype.step = function (i) {
+
+
+        if (this.dist <= this.vdist) {
+            this.x = this.targetX;
+            this.y = this.targetY;
+            this.changeTarget();
+
+        } else {
+            this.x += Math.cos(this.angle) * this.vdist;
+            this.y += Math.sin(this.angle) * this.vdist;
+        }
+
+        this.updateDist();
+
+        this.path.push({
+            x: this.x,
+            y: this.y,
+        });
+
+        if (this.path.length > this.pointCount) {
+            this.path.shift();
+        }
+
+        if (!this.life--) {
+            lines.splice(i, 1);
+        }
+
+    }
+
+    line.prototype.draw = function () {
+        var range = rand(0, 5);
+
+        ctx.beginPath();
+        this.path.forEach(function (point, index) {
+            ctx[index === 0 ? 'moveTo' : 'lineTo'](point.x + rand(-range, range), point.y + rand(-range, range));
+        })
+        ctx.strokeStyle = 'hsla(hue,80%,55%,opacity)'.replace('hue', rand(this.hue, this.hue + 30)).replace('opacity', this.life / this.allLife / 2);
+        ctx.lineWidth = rand(0.1, 2);
+        ctx.stroke();
+
+    }
+
+
+    var canvas = document.getElementById('canvas'),
+      ctx = canvas.getContext('2d'),
+      size = 30,
+      count = 30,
+      lines = [],
+      tick = 0,
+      width,
+      height;
+
+
+    window.addEventListener('resize', onresize);
+
+    reset();
+    create();
+    loop();
+
+    window.onclick = function () {
+        console.log(lines);
+    }
+
+</script>
+</body>
+</html>
